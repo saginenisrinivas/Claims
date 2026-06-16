@@ -38,29 +38,24 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-06-15 17:06:18.651  INFO 43596 --- [           main] com.claimspro.ClaimsProApplication       : Starting ClaimsProApplication using Java 17.0.11 on DESKTOP-UV1O67D with PID 43596 (C:\ClaudeCodeAI\Claims\target\classes started by Sagineni in C:\ClaudeCodeAI\Claims)
-2026-06-15 17:06:18.654 DEBUG 43596 --- [           main] com.claimspro.ClaimsProApplication       : Running with Spring Boot v2.7.18, Spring v5.3.31
-2026-06-15 17:06:18.655  INFO 43596 --- [           main] com.claimspro.ClaimsProApplication       : No active profile set, falling back to 1 default profile: "default"
-2026-06-15 17:06:19.722  INFO 43596 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-06-15 17:06:19.862  INFO 43596 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 122 ms. Found 4 JPA repository interfaces.
-2026-06-15 17:06:20.843  INFO 43596 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9090 (http)
-2026-06-15 17:06:20.856  INFO 43596 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-06-15 17:06:20.857  INFO 43596 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-06-15 17:06:21.294  INFO 43596 --- [           main] org.apache.jasper.servlet.TldScanner     : At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
-2026-06-15 17:06:21.310  INFO 43596 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-06-15 17:06:21.311  INFO 43596 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2589 ms
-2026-06-15 17:06:21.484  INFO 43596 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-06-15 17:06:21.545  INFO 43596 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 5.6.15.Final
-2026-06-15 17:06:21.736  INFO 43596 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
-2026-06-15 17:06:21.859  INFO 43596 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-06-15 17:06:22.081  INFO 43596 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-06-15 17:06:22.106  INFO 43596 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
-2026-06-15 17:06:23.422  INFO 43596 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
-2026-06-15 17:06:23.435  INFO 43596 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-06-15 17:06:24.589  INFO 43596 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9090 (http) with context path ''
-2026-06-15 17:06:24.601  INFO 43596 --- [           main] com.claimspro.ClaimsProApplication       : Started ClaimsProApplication in 6.479 seconds (JVM running for 7.214)
-2026-06-15 17:06:41.331  INFO 43596 --- [nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-06-15 17:06:41.332  INFO 43596 --- [nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-06-15 17:06:41.333  INFO 43596 --- [nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
-2026-06-15 17:09:00.190 DEBUG 43596 --- [nio-9090-exec-6] c.c.s.ClaimRegistrationSoapService       : registerClaim SOAP response for CLM-2026-0023: <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns1:registerClaimResponse xmlns:ns1="http://service.esb.soa.pub.ebao.com/"><result><appExceptions/><cardDetailsByIDNumber/><claimDetailsByCaseNumber/><getClaimCaseStatusByIdNumber/><getInsuredListByPolicyCode/><insuredListByClaimType/><investmentReportData/><nonGSOPolicies/><policyScheduleReportData/><registerClaimResponse><registerClaimResponse><caseNumber>FUN260002277</caseNumber><caseStatus>CASE REGISTERED and WAITING FOR ACCEPTANCE</caseStatus></registerClaimResponse></registerClaimResponse><reporterInfoByPolicyCode/><successFlag>1</successFlag><taxCertificateReportData/><getcashBackEligibityInfo/></result></ns1:registerClaimResponse></soap:Body></soap:Envelope>
-2026-06-15 17:09:00.192  INFO 43596 --- [nio-9090-exec-6] c.c.s.ClaimRegistrationSoapService       : BCP registration successful for CLM-2026-0023: caseNumber=FUN260002277, status=CASE REGISTERED and WAITING FOR ACCEPTANCE
+2026-06-16 16:32:34.607  INFO 13080 --- [           main] com.claimspro.ClaimsProApplication       : Starting ClaimsProApplication using Java 17.0.11 on DESKTOP-UV1O67D with PID 13080 (C:\ClaudeCodeAI\Claims\target\classes started by Sagineni in C:\ClaudeCodeAI\Claims)
+2026-06-16 16:32:34.609 DEBUG 13080 --- [           main] com.claimspro.ClaimsProApplication       : Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-06-16 16:32:34.610  INFO 13080 --- [           main] com.claimspro.ClaimsProApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-06-16 16:32:35.390  INFO 13080 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-16 16:32:35.478  INFO 13080 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 78 ms. Found 4 JPA repository interfaces.
+2026-06-16 16:32:36.136  INFO 13080 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9090 (http)
+2026-06-16 16:32:36.147  INFO 13080 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-16 16:32:36.148  INFO 13080 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-06-16 16:32:36.459  INFO 13080 --- [           main] org.apache.jasper.servlet.TldScanner     : At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+2026-06-16 16:32:36.472  INFO 13080 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-16 16:32:36.472  INFO 13080 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1793 ms
+2026-06-16 16:32:36.611  INFO 13080 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-16 16:32:36.688  INFO 13080 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-06-16 16:32:36.973  INFO 13080 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-06-16 16:32:37.109  INFO 13080 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-16 16:32:37.365  INFO 13080 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-16 16:32:37.387  INFO 13080 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
+2026-06-16 16:32:38.403  INFO 13080 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-06-16 16:32:38.415  INFO 13080 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-16 16:32:39.391  INFO 13080 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9090 (http) with context path ''
+2026-06-16 16:32:39.401  INFO 13080 --- [           main] com.claimspro.ClaimsProApplication       : Started ClaimsProApplication in 5.329 seconds (JVM running for 5.856)
