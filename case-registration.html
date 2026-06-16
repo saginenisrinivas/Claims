@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Case Registration — ClaimsPro</title>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <style>
+    /* ── Section accordion ── */
+    .form-section {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 18px;
+      background: linear-gradient(90deg, #eef2ff, #f8fafc);
+      border-bottom: 1px solid #e5e7eb;
+      cursor: pointer;
+      user-select: none;
+    }
+    .section-header:hover { background: linear-gradient(90deg, #e0e7ff, #f1f5f9); }
+    .section-toggle {
+      width: 18px; height: 18px;
+      background: #0f3460;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform .2s;
+    }
+    .section-toggle.collapsed { transform: rotate(-90deg); }
+    .section-title { font-size: 13.5px; font-weight: 700; color: #0f3460; }
+    .section-body { padding: 18px 20px; background: #fff; }
+    .section-body.hidden { display: none; }
+
+    /* ── Row layouts ── */
+    .row-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px 20px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px 20px; }
+    .row-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px 20px; }
+    .row-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px 20px; }
+    .span-2  { grid-column: span 2; }
+    .span-3  { grid-column: span 3; }
+    .span-4  { grid-column: span 4; }
+
+    /* ── Field ── */
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+      white-space: nowrap;
+    }
+    .field label .req { color: #e94560; margin-left: 2px; }
+    .field input, .field select, .field textarea {
+      padding: 7px 11px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13.5px;
+      color: #111;
+      background: #fff;
+      outline: none;
+      font-family: inherit;
+      transition: border-color .18s, box-shadow .18s;
+      width: 100%;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: #0f3460;
+      box-shadow: 0 0 0 3px rgba(15,52,96,.08);
+    }
+    .field input[readonly], .field input[disabled] {
+      background: #f3f4f6;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+    .field input.err, .field select.err, .field textarea.err { border-color: #ef4444; }
+    .field .errmsg { font-size: 11px; color: #ef4444; display: none; }
+    .field .errmsg.show { display: block; }
+    textarea.field-ta { resize: vertical; min-height: 72px; }
+
+    /* ── Agent row ── */
+    .agent-pair { display: flex; gap: 6px; }
+    .agent-pair input:first-child { width: 110px; flex-shrink: 0; }
+    .agent-pair input:last-child  { flex: 1; }
+
+    /* ── Checkboxes ── */
+    .checkbox-group { display: flex; align-items: center; gap: 24px; padding: 6px 0; }
+    .chk-item { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: #374151; cursor: pointer; }
+    .chk-item input[type=checkbox] { width: 15px; height: 15px; accent-color: #0f3460; cursor: pointer; }
+
+    /* ── Bottom action bar ── */
+    .action-bar {
+      position: sticky;
+      bottom: 0;
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      z-index: 40;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+    }
+    .action-bar .btn { min-width: 110px; justify-content: center; }
+
+    /* ── Alert ── */
+    #pageAlert {
+      margin: 0 28px 16px;
+      padding: 11px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    #pageAlert.success { background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;display:flex; }
+    #pageAlert.error   { background:#fff5f5;color:#991b1b;border:1px solid #fecaca;display:flex; }
+
+    @media(max-width:900px) {
+      .row-4 { grid-template-columns: 1fr 1fr; }
+      .row-3 { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:600px) {
+      .row-4,.row-3,.row-2,.row-2-1 { grid-template-columns: 1fr; }
+      .span-2,.span-3,.span-4 { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <div class="main">
+    <header class="top-header">
+      <div class="header-left">
+        <h2>Case Registration</h2>
+        <p>Register a new insurance claim</p>
+      </div>
+      <div class="header-right">
+        <div class="header-user">
+          <svg width="15" height="15" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="header-user-name" id="headerUserName">User</span>
+        </div>
+        <span id="caseIdBadge" style="font-size:13px;font-weight:700;color:#0f3460;background:#eef2ff;padding:5px 14px;border-radius:7px;"></span>
+      </div>
+    </header>
+
+    <!-- Alert -->
+    <div id="pageAlert"></div>
+
+    <main class="page-content" style="padding-bottom:0;">
+
+      <!-- ① Insured Information -->
+      <div class="form-section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-toggle">
+            <svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <span class="section-title">Insured Information</span>
+        </div>
+        <div class="section-body">
+          <div class="row-4">
+            <div class="field span-2">
+              <label>Life Assured Name <span class="req">*</span></label>
+              <input type="text" id="lifeAssuredName" placeholder="First Name and Last Name"/>
+              <span class="errmsg" id="e_lifeAssuredName">Required.</span>
+            </div>
+            <div class="field">
+              <label>Gender</label>
+              <select id="gender">
+                <option value="">— Select —</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <!-- spacer -->
+            </div>
+
+            <div class="field">
+              <label>ID Type</label>
+              <select id="idType">
+                <option value="">— Select —</option>
+                <option value="1">National ID</option>
+                <option value="2">Passport</option>
+                <option value="3">Driver's License</option>
+                <option value="4">Birth Certificate</option>
+                <option value="9">Others</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>ID No.</label>
+              <input type="text" id="idNo" placeholder="Identity number"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② Claim Information -->
+      <div class="form-section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-toggle">
+            <svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <span class="section-title">Claim Information</span>
+        </div>
+        <div class="section-body">
+          <div class="row-4">
+            <div class="field">
+              <label>Type of Claim <span class="req">*</span></label>
+              <select id="claimType">
+                <option value="">Please Select</option>
+                <option>Death</option>
+                <option>Total Permanent Disability</option>
+                <option>Critical Illness</option>
+                <option>Medical &amp; Hospitalisation</option>
+                <option>Accidental Death</option>
+                <option>Accidental Disability</option>
+                <option>Maturity</option>
+                <option>Surrender</option>
+                <option>Others</option>
+              </select>
+              <span class="errmsg" id="e_claimType">Required.</span>
+            </div>
+            <div class="field">
+              <label>Notification Date <span class="req">*</span></label>
+              <input type="date" id="notificationDate"/>
+              <span class="errmsg" id="e_notificationDate">Required.</span>
+            </div>
+            <div class="field">
+              <label>Claim Nature <span class="req">*</span></label>
+              <select id="claimNature">
+                <option value="">Please Select</option>
+                <option>Individual Life</option>
+                <option>Group Life</option>
+                <option>Health</option>
+                <option>General</option>
+                <option>Reinsurance</option>
+              </select>
+              <span class="errmsg" id="e_claimNature">Required.</span>
+            </div>
+            <div class="field">
+              <label>Case Classification</label>
+              <select id="caseClassification">
+                <option value="">Please Select</option>
+                <option>Standard</option>
+                <option>Complex</option>
+                <option>Fast Track</option>
+                <option>Fraud Investigation</option>
+                <option>Legal</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Event Date</label>
+              <input type="date" id="eventDate"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ Reporter Information -->
+      <div class="form-section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-toggle">
+            <svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <span class="section-title">Reporter Information</span>
+        </div>
+        <div class="section-body">
+          <div class="row-4" style="margin-bottom:14px;">
+            <div class="field">
+              <label>Reporter Name <span class="req">*</span></label>
+              <input type="text" id="reporterName" placeholder="Full name"/>
+              <span class="errmsg" id="e_reporterName">Required.</span>
+            </div>
+            <div class="field">
+              <label>Relation With Life Assured <span class="req">*</span></label>
+              <select id="relation">
+                <option value="Self">Self</option>
+                <option value="Spouse">Spouse</option>
+                <option value="Parent">Parent</option>
+                <option value="Child">Child</option>
+                <option value="Sibling">Sibling</option>
+                <option value="Legal Representative">Legal Representative</option>
+                <option value="Other">Other</option>
+              </select>
+              <span class="errmsg" id="e_relation">Required.</span>
+            </div>
+            <div class="field">
+              <label>Report Via <span class="req">*</span></label>
+              <select id="reportVia">
+                <option value="Post / Mail">Post / Mail</option>
+                <option value="Phone">Phone</option>
+                <option value="Email">Email</option>
+                <option value="Walk In">Walk In</option>
+                <option value="Online Portal">Online Portal</option>
+                <option value="Agent">Agent</option>
+              </select>
+              <span class="errmsg" id="e_reportVia">Required.</span>
+            </div>
+            <div class="field"><!-- spacer --></div>
+
+            <div class="field">
+              <label>Mobile Phone <span class="req">*</span></label>
+              <input type="tel" id="mobilePhone" placeholder="e.g. 60123456789"/>
+              <span class="errmsg" id="e_mobilePhone">Required.</span>
+            </div>
+            <div class="field">
+              <label>SMS <span class="req">*</span></label>
+              <select id="smsConsent">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Contact Number</label>
+              <input type="tel" id="contactNumber" placeholder="Home / office number"/>
+            </div>
+            <div class="field">
+              <label>Email Address <span class="req">*</span></label>
+              <input type="email" id="emailAddress" placeholder="reporter@email.com"/>
+              <span class="errmsg" id="e_emailAddress">Enter a valid email.</span>
+            </div>
+          </div>
+
+          <!-- Address + Postal -->
+          <div class="row-2" style="margin-bottom:14px;">
+            <div class="field">
+              <label>Address <span class="req">*</span></label>
+              <input type="text" id="addr1" placeholder="Address line 1" style="margin-bottom:5px;"/>
+              <input type="text" id="addr2" placeholder="Address line 2" style="margin-bottom:5px;"/>
+              <input type="text" id="addr3" placeholder="City / Town" style="margin-bottom:5px;"/>
+              <input type="text" id="addr4" placeholder="State / Province"/>
+              <span class="errmsg" id="e_addr1">Address is required.</span>
+            </div>
+            <div class="field" style="align-self:start;">
+              <label>Postal Code</label>
+              <input type="text" id="postalCode" placeholder="e.g. 50000" style="max-width:180px;"/>
+            </div>
+          </div>
+
+          <!-- Agent row -->
+          <div class="row-4">
+            <div class="field span-2">
+              <label>Agent</label>
+              <div class="agent-pair">
+                <input type="text" id="agentCode" placeholder="Agent code" readonly/>
+                <input type="text" id="agentName" placeholder="Agent name"  readonly/>
+              </div>
+            </div>
+            <div class="field">
+              <label>Mobile Phone</label>
+              <input type="tel" id="agentMobile" readonly/>
+            </div>
+            <div class="field">
+              <label>SMS</label>
+              <select id="agentSms" disabled>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ Policy Type -->
+      <div class="form-section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-toggle">
+            <svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <span class="section-title">Policy Type</span>
+        </div>
+        <div class="section-body">
+          <div class="checkbox-group">
+            <label class="chk-item">
+              <input type="checkbox" id="polIndividual" checked/> Individual
+            </label>
+            <label class="chk-item">
+              <input type="checkbox" id="polGroup"/> Group
+            </label>
+            <label class="chk-item">
+              <input type="checkbox" id="polBanca"/> Bancassurance
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑤ Claim Comments -->
+      <div class="form-section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-toggle">
+            <svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <span class="section-title">Claim Comments</span>
+        </div>
+        <div class="section-body">
+          <div class="row-4" style="margin-bottom:14px;">
+            <div class="field">
+              <label>Claim Officer</label>
+              <select id="claimOfficer">
+                <option value="">Please Select</option>
+                <option>Officer A</option>
+                <option>Officer B</option>
+                <option>Officer C</option>
+                <option>Officer D</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Pending Status</label>
+              <input type="text" id="pendingStatus" placeholder="e.g. Awaiting documents"/>
+            </div>
+            <div class="field">
+              <label>Review Date</label>
+              <input type="date" id="reviewDate"/>
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Comments History</label>
+              <textarea class="field-ta" id="commentsHistory" rows="4" readonly
+                placeholder="Previous comments will appear here…"></textarea>
+            </div>
+            <div class="field">
+              <label>General Comments <span class="req">*</span></label>
+              <textarea class="field-ta" id="generalComments" rows="4"
+                placeholder="Enter remarks or notes about this claim…"></textarea>
+              <span class="errmsg" id="e_generalComments">Required.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Action buttons (sticky bottom) -->
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="handleSubmit()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Submit
+      </button>
+      <button class="btn btn-warning" onclick="handlePend()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Pend
+      </button>
+      <button class="btn btn-outline" onclick="handleQueryComments()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        Query Comments
+      </button>
+      <button class="btn btn-ghost" onclick="handleExit()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Exit
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  document.getElementById('sidebar').innerHTML = App.sidebarHTML();
+  App.init('registration');
+
+  /* ── Defaults ── */
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('notificationDate').value = today;
+
+  /* Review date = today + 8 days */
+  const reviewDt = new Date();
+  reviewDt.setDate(reviewDt.getDate() + 8);
+  document.getElementById('reviewDate').value = reviewDt.toISOString().split('T')[0];
+
+  document.getElementById('eventDate').max = today;
+
+  /* Display next case ID */
+  document.getElementById('caseIdBadge').textContent = App.generateId();
+
+  /* Seed agent info (demo) */
+  const user = App.getUser();
+  document.getElementById('agentCode').value  = '65000020';
+  document.getElementById('agentName').value  = user?.name || 'Agent Name';
+  document.getElementById('agentMobile').value = '99650002094';
+
+  /* ── Section toggle ── */
+  function toggleSection(header) {
+    const toggle = header.querySelector('.section-toggle');
+    const body   = header.nextElementSibling;
+    toggle.classList.toggle('collapsed');
+    body.classList.toggle('hidden');
+  }
+
+  /* ── Validation ── */
+  const REQUIRED_FIELDS = [
+    { id: 'lifeAssuredName', err: 'e_lifeAssuredName', check: v => v.trim().length > 0 },
+    { id: 'claimType',       err: 'e_claimType',       check: v => v !== '' },
+    { id: 'notificationDate',err: 'e_notificationDate',check: v => v !== '' },
+    { id: 'claimNature',     err: 'e_claimNature',     check: v => v !== '' },
+    { id: 'reporterName',    err: 'e_reporterName',    check: v => v.trim().length > 0 },
+    { id: 'relation',        err: 'e_relation',        check: v => v !== '' },
+    { id: 'reportVia',       err: 'e_reportVia',       check: v => v !== '' },
+    { id: 'mobilePhone',     err: 'e_mobilePhone',     check: v => v.trim().length > 0 },
+    { id: 'emailAddress',    err: 'e_emailAddress',    check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+    { id: 'addr1',           err: 'e_addr1',           check: v => v.trim().length > 0 },
+    { id: 'generalComments', err: 'e_generalComments', check: v => v.trim().length > 0 }
+  ];
+
+  function validate() {
+    let ok = true;
+    REQUIRED_FIELDS.forEach(f => {
+      const el  = document.getElementById(f.id);
+      const err = document.getElementById(f.err);
+      const invalid = !f.check(el.value);
+      el.classList.toggle('err', invalid);
+      err.classList.toggle('show', invalid);
+      if (invalid) ok = false;
+    });
+
+    /* Open sections that have errors */
+    if (!ok) {
+      document.querySelectorAll('.form-section').forEach(sec => {
+        const body = sec.querySelector('.section-body');
+        const hasErr = body.querySelector('.err, .errmsg.show');
+        if (hasErr && body.classList.contains('hidden')) {
+          const toggle = sec.querySelector('.section-toggle');
+          toggle.classList.remove('collapsed');
+          body.classList.remove('hidden');
+        }
+      });
+    }
+    return ok;
+  }
+
+  function buildCaseData(status) {
+    const policyTypes = [];
+    if (document.getElementById('polIndividual').checked) policyTypes.push('Individual');
+    if (document.getElementById('polGroup').checked)      policyTypes.push('Group');
+    if (document.getElementById('polBanca').checked)      policyTypes.push('Bancassurance');
+
+    return {
+      id:               App.generateId(),
+      /* Insured */
+      lifeAssuredName:  document.getElementById('lifeAssuredName').value.trim(),
+      gender:           document.getElementById('gender').value,
+      idType:           document.getElementById('idType').value,
+      idNo:             document.getElementById('idNo').value.trim(),
+      /* Claim */
+      claimType:        document.getElementById('claimType').value,
+      notificationDate: document.getElementById('notificationDate').value,
+      claimNature:      document.getElementById('claimNature').value,
+      caseClassification: document.getElementById('caseClassification').value,
+      eventDate:        document.getElementById('eventDate').value,
+      /* Reporter */
+      claimantName:     document.getElementById('reporterName').value.trim(),
+      relation:         document.getElementById('relation').value,
+      reportVia:        document.getElementById('reportVia').value,
+      phone:            document.getElementById('mobilePhone').value.trim(),
+      smsConsent:       document.getElementById('smsConsent').value,
+      contactNumber:    document.getElementById('contactNumber').value.trim(),
+      email:            document.getElementById('emailAddress').value.trim(),
+      address:          [
+        document.getElementById('addr1').value.trim(),
+        document.getElementById('addr2').value.trim(),
+        document.getElementById('addr3').value.trim(),
+        document.getElementById('addr4').value.trim()
+      ].filter(Boolean).join(', '),
+      postalCode:       document.getElementById('postalCode').value.trim(),
+      agentCode:        document.getElementById('agentCode').value,
+      agentName:        document.getElementById('agentName').value,
+      /* Policy */
+      policyType:       policyTypes,
+      /* Comments */
+      claimOfficer:     document.getElementById('claimOfficer').value,
+      pendingStatus:    document.getElementById('pendingStatus').value.trim(),
+      reviewDate:       document.getElementById('reviewDate').value,
+      generalComments:  document.getElementById('generalComments').value.trim(),
+      /* Meta */
+      status:           status,
+      submittedAt:      new Date().toISOString(),
+      amount:           0
+    };
+  }
+
+  function showAlert(type, msg) {
+    const el = document.getElementById('pageAlert');
+    el.className = type;
+    el.textContent = msg;
+    setTimeout(() => el.className = '', 6000);
+  }
+
+  /* ── Button handlers ── */
+  function handleSubmit() {
+    if (!validate()) {
+      showAlert('error', 'Please fill in all required fields before submitting.');
+      return;
+    }
+    const data = buildCaseData('submitted');
+    App.addCase(data);
+    App.toast(`Case ${data.id} submitted successfully!`, 'success');
+    showAlert('success', `Case ${data.id} has been registered and is pending acceptance.`);
+    resetForm();
+    document.getElementById('caseIdBadge').textContent = App.generateId();
+    App.renderBadges();
+  }
+
+  function handlePend() {
+    if (!document.getElementById('lifeAssuredName').value.trim()) {
+      showAlert('error', 'Life Assured Name is required to save as pending.');
+      return;
+    }
+    const data = buildCaseData('submitted');
+    data.status = 'submitted';
+    data.pendingStatus = document.getElementById('pendingStatus').value || 'Pending — Incomplete';
+    App.addCase(data);
+    App.toast(`Case ${data.id} saved as pending.`, 'info');
+    showAlert('success', `Case ${data.id} saved as pending.`);
+    document.getElementById('caseIdBadge').textContent = App.generateId();
+    App.renderBadges();
+  }
+
+  function handleQueryComments() {
+    const hist = document.getElementById('commentsHistory');
+    const general = document.getElementById('generalComments').value.trim();
+    if (!general) { App.toast('Enter a comment in General Comments first.', 'error'); return; }
+    const ts = new Date().toLocaleString('en-US', { dateStyle:'medium', timeStyle:'short' });
+    hist.value = (hist.value ? hist.value + '\n\n' : '') +
+      `[${ts}] ${App.getUser()?.name || 'User'}: ${general}`;
+    document.getElementById('generalComments').value = '';
+    App.toast('Comment added to history.', 'success');
+  }
+
+  function handleExit() {
+    if (confirm('Exit case registration? Unsaved data will be lost.')) {
+      window.location.href = 'dashboard.html';
+    }
+  }
+
+  function resetForm() {
+    /* Keep notification date */
+    const fields = [
+      'lifeAssuredName','gender','idType','idNo',
+      'claimType','claimNature','caseClassification','eventDate',
+      'reporterName','mobilePhone','contactNumber','emailAddress',
+      'addr1','addr2','addr3','addr4','postalCode',
+      'claimOfficer','pendingStatus','generalComments'
+    ];
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el.tagName === 'SELECT') el.value = el.options[0].value;
+      else el.value = '';
+    });
+    document.getElementById('relation').value    = 'Self';
+    document.getElementById('reportVia').value   = 'Post / Mail';
+    document.getElementById('smsConsent').value  = 'Yes';
+    document.getElementById('polIndividual').checked = true;
+    document.getElementById('polGroup').checked  = false;
+    document.getElementById('polBanca').checked  = false;
+    document.getElementById('commentsHistory').value = '';
+    document.querySelectorAll('.err').forEach(el => el.classList.remove('err'));
+    document.querySelectorAll('.errmsg.show').forEach(el => el.classList.remove('show'));
+  }
+
+  /* Clear individual error on input */
+  REQUIRED_FIELDS.forEach(f => {
+    const el = document.getElementById(f.id);
+    el.addEventListener('input',  () => { if (f.check(el.value)) { el.classList.remove('err'); document.getElementById(f.err).classList.remove('show'); } });
+    el.addEventListener('change', () => { if (f.check(el.value)) { el.classList.remove('err'); document.getElementById(f.err).classList.remove('show'); } });
+  });
+</script>
+</body>
+</html>

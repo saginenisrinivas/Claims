@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(java -version 2>&1; echo \"---\"; $env:JAVA_HOME; echo \"---\"; $env:PATH -split \";\" | Where-Object { $_ -match \"java|jdk|maven|mvn\" -or $_ -match \"Java\" })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Sagineni\\\\Downloads\\\\\" | Where-Object { $_.Name -match \"maven\" } | Select-Object Name, FullName)",
+      "PowerShell(Get-Content \"C:\\\\ClaudeCodeAI\\\\Claims\\\\app.log\" | Where-Object { $_ -match \"ERROR|Exception|Cannot|FileNotFoundException|404|500|not found\" } | Select-Object -First 30)",
+      "PowerShell(Get-Process java -ErrorAction SilentlyContinue)",
+      "PowerShell($proc = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | Select-Object -First 1 OwningProcess; if \\($proc\\) { Stop-Process -Id $proc.OwningProcess -Force; Write-Output \"Killed PID $\\($proc.OwningProcess\\)\" } else { Write-Output \"No process on 8080\" })",
+      "PowerShell($proc = Get-NetTCPConnection -LocalPort 8090 -ErrorAction SilentlyContinue | Select-Object -First 1 OwningProcess; if \\($proc\\) { Stop-Process -Id $proc.OwningProcess -Force; Write-Output \"Stopped PID $\\($proc.OwningProcess\\)\" })",
+      "PowerShell(mvn --version)",
+      "PowerShell(java -version)",
+      "PowerShell($env:PATH = \"C:\\\\Users\\\\Sagineni\\\\Downloads\\\\apache-maven-3.8.6\\\\bin;$env:PATH\"; Set-Location \"c:\\\\ClaudeCodeAI\\\\Claims\"; mvn clean package -DskipTests 2>&1)",
+      "PowerShell(& \"C:\\\\Users\\\\Sagineni\\\\Downloads\\\\apache-maven-3.8.6\\\\bin\\\\mvn.cmd\" -version)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Sagineni\\\\Downloads\\\\\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'maven' })",
+      "PowerShell(Get-Process java -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne 0 } | Select-Object Id, StartTime)",
+      "PowerShell(Stop-Process -Id 27360, 29068 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(netstat -ano)",
+      "PowerShell($env:PGPASSWORD = \"your_new_password\"; & \"C:\\\\Program Files\\\\PostgreSQL\\\\16\\\\bin\\\\psql.exe\" -U postgres -d Claims_DB_BLIL -c \"SELECT id, life_assured_name, claim_type, status FROM claims ORDER BY id;\" 2>&1)",
+      "PowerShell($env:PGPASSWORD = \"your_new_password\"; & \"C:\\\\Program Files\\\\PostgreSQL\\\\16\\\\bin\\\\psql.exe\" -U postgres -d Claims_DB_BLIL -c \"SELECT id, email, name, role FROM users ORDER BY id;\" 2>&1)",
+      "Bash(\"C:\\\\Users\\\\Sagineni\\\\Downloads\\\\apache-maven-3.8.6-bin\\\\apache-maven-3.8.6\\\\bin\\\\mvn.cmd\" compile *)",
+      "Bash(\"C:\\\\Users\\\\Sagineni\\\\Downloads\\\\apache-maven-3.8.6-bin\\\\apache-maven-3.8.6\\\\bin\\\\mvn.cmd\" package *)",
+      "Bash(taskkill /F /IM java.exe)",
+      "PowerShell(Stop-Process -Name java -Force -ErrorAction SilentlyContinue)",
+      "Bash(curl -s -c /tmp/cookies.txt -X POST \"http://localhost:9090/api/auth/login\" -H \"Content-Type: application/json\" -d '{\"email\":\"officer@claims.com\",\"password\":\"officer123\"}')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s -b /tmp/cookies.txt \"http://localhost:9090/case-registration\")",
+      "Bash(mvn --version)",
+      "PowerShell(Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 2; $mvn = \"C:\\\\Users\\\\Sagineni\\\\.m2\\\\wrapper\\\\dists\\\\apache-maven-3.9.5-bin\\\\2adeog8mj13csp1uusqnc1f2mo\\\\apache-maven-3.9.5\\\\bin\\\\mvn.cmd\"; Set-Location \"c:\\\\ClaudeCodeAI\\\\Claims\"; & $mvn clean package -DskipTests 2>&1)",
+      "PowerShell(cd c:\\\\ClaudeCodeAI\\\\Claims; $mvn = \"C:\\\\Users\\\\Sagineni\\\\.m2\\\\wrapper\\\\dists\\\\apache-maven-3.9.5-bin\\\\2adeog8mj13csp1uusqnc1f2mo\\\\apache-maven-3.9.5\\\\bin\\\\mvn.cmd\"; & $mvn package -DskipTests 2>&1 | Select-Object -Last 5)",
+      "PowerShell(Start-Sleep -Seconds 20; Select-String -Path \"c:\\\\ClaudeCodeAI\\\\Claims\\\\app.log\" -Pattern \"Started|ERROR|WARN\" | Select-Object -Last 10 | ForEach-Object { $_.Line })",
+      "PowerShell(Stop-Process -Id 5516 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(taskkill /PID 5516 /F)",
+      "PowerShell(Get-Process -Id 5516 -ErrorAction SilentlyContinue)",
+      "PowerShell(cd c:\\\\ClaudeCodeAI\\\\Claims; $mvn = \"C:\\\\Users\\\\Sagineni\\\\.m2\\\\wrapper\\\\dists\\\\apache-maven-3.9.5-bin\\\\2adeog8mj13csp1uusqnc1f2mo\\\\apache-maven-3.9.5\\\\bin\\\\mvn.cmd\"; & $mvn package -DskipTests -q 2>&1 | Select-Object -Last 3)",
+      "PowerShell(cd c:\\\\ClaudeCodeAI\\\\Claims; $mvn = \"C:\\\\Users\\\\Sagineni\\\\.m2\\\\wrapper\\\\dists\\\\apache-maven-3.9.5-bin\\\\2adeog8mj13csp1uusqnc1f2mo\\\\apache-maven-3.9.5\\\\bin\\\\mvn.cmd\"; & $mvn package -DskipTests 2>&1 | Select-Object -Last 4)",
+      "PowerShell(cd c:\\\\ClaudeCodeAI\\\\Claims; $mvn = \"C:\\\\Users\\\\Sagineni\\\\.m2\\\\wrapper\\\\dists\\\\apache-maven-3.9.5-bin\\\\2adeog8mj13csp1uusqnc1f2mo\\\\apache-maven-3.9.5\\\\bin\\\\mvn.cmd\"; & $mvn package -DskipTests 2>&1 | Select-Object -Last 1)",
+      "PowerShell(Get-Process -Name \"java\" -ErrorAction SilentlyContinue | ForEach-Object { taskkill /PID $_.Id /F 2>$null }; Start-Sleep -Seconds 2; Write-Host \"Stopped\")"
+    ]
+  }
+}

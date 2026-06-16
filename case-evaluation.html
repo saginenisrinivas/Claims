@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Case Evaluation — ClaimsPro</title>
+  <link rel="stylesheet" href="assets/style.css"/>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <div class="main">
+    <header class="top-header">
+      <div class="header-left">
+        <h2>Case Evaluation</h2>
+        <p>Evaluate accepted cases and assess claim amounts</p>
+      </div>
+      <div class="header-right">
+        <div class="header-user">
+          <svg width="15" height="15" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="header-user-name" id="headerUserName">User</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#0f3460;background:#eef2ff;padding:6px 14px;border-radius:8px;" id="pendingCount"></div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="card">
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <input type="text" class="form-control search-box" id="searchInput" placeholder="Search by name, ID or type…"/>
+          <select class="form-control" id="filterStatus" style="max-width:200px;">
+            <option value="">All Statuses</option>
+            <option value="accepted">Accepted</option>
+            <option value="under_evaluation">Under Evaluation</option>
+            <option value="evaluated">Evaluated</option>
+          </select>
+          <select class="form-control" id="filterRisk" style="max-width:160px;">
+            <option value="">All Risk Levels</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Case ID</th>
+                <th>Claimant</th>
+                <th>Type</th>
+                <th>Claimed</th>
+                <th>Evaluated Amt</th>
+                <th>Risk</th>
+                <th>Accepted On</th>
+                <th>Status</th>
+                <th style="text-align:center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Evaluate Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Evaluate Case</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:2px;" id="modalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  document.getElementById('sidebar').innerHTML = App.sidebarHTML();
+  App.init('evaluation');
+
+  let currentCaseId = null;
+  let currentMode = null; // 'view' | 'evaluate'
+
+  /* ── Render table ─────────────────────── */
+  function render() {
+    const search  = document.getElementById('searchInput').value.toLowerCase();
+    const stFilter= document.getElementById('filterStatus').value;
+    const rkFilter= document.getElementById('filterRisk').value;
+
+    let cases = App.getCases().filter(c =>
+      ['accepted','under_evaluation','evaluated'].includes(c.status)
+    );
+
+    const pending = cases.filter(c => ['accepted','under_evaluation'].includes(c.status)).length;
+    document.getElementById('pendingCount').textContent = `${pending} In Progress`;
+
+    if (search)   cases = cases.filter(c =>
+      c.id.toLowerCase().includes(search) ||
+      c.claimantName.toLowerCase().includes(search) ||
+      c.claimType.toLowerCase().includes(search)
+    );
+    if (stFilter) cases = cases.filter(c => c.status === stFilter);
+    if (rkFilter) cases = cases.filter(c => c.riskLevel === rkFilter);
+
+    const tbody = document.getElementById('tableBody');
+    if (!cases.length) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/>
+        </svg>
+        <h3>No cases to evaluate</h3>
+        <p>Cases appear here after they are accepted.</p>
+      </div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = cases.map(c => {
+      const canEval = c.status === 'accepted';
+      const inProg  = c.status === 'under_evaluation';
+      return `
+        <tr>
+          <td class="td-bold">${c.id}</td>
+          <td>
+            <div style="font-weight:500;">${c.claimantName}</div>
+            <div class="td-muted">${c.email}</div>
+          </td>
+          <td>${c.claimType}</td>
+          <td class="td-bold">${App.fmtCurrency(c.amount)}</td>
+          <td>${c.evaluatedAmount != null ? `<span style="font-weight:600;color:#0f3460;">${App.fmtCurrency(c.evaluatedAmount)}</span>` : '<span class="td-muted">—</span>'}</td>
+          <td>${App.riskBadge(c.riskLevel)}</td>
+          <td class="td-muted">${App.fmtDate(c.acceptedAt)}</td>
+          <td>${App.statusBadge(c.status)}</td>
+          <td class="td-actions" style="text-align:center;">
+            <div class="flex gap-8" style="justify-content:center;">
+              <button class="btn btn-outline btn-sm" onclick="openView('${c.id}')">View</button>
+              ${canEval ? `<button class="btn btn-warning btn-sm" onclick="startEval('${c.id}')">Start Eval</button>` : ''}
+              ${inProg  ? `<button class="btn btn-purple btn-sm" onclick="openEvaluate('${c.id}')">Evaluate</button>` : ''}
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  /* ── View modal ───────────────────────── */
+  function openView(id) {
+    const c = App.getCaseById(id);
+    if (!c) return;
+    currentCaseId = id;
+    currentMode = 'view';
+
+    document.getElementById('modalTitle').textContent = `Case Details — ${c.id}`;
+    document.getElementById('modalSubtitle').textContent = `${c.claimType} · ${c.claimantName}`;
+
+    document.getElementById('modalBody').innerHTML = `
+      <div class="detail-grid" style="margin-bottom:16px;">
+        <div class="detail-item"><div class="detail-label">Claimant</div><div class="detail-value">${c.claimantName}</div></div>
+        <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${c.email}</div></div>
+        <div class="detail-item"><div class="detail-label">Type</div><div class="detail-value">${c.claimType}</div></div>
+        <div class="detail-item"><div class="detail-label">Incident Date</div><div class="detail-value">${App.fmtDate(c.incidentDate)}</div></div>
+        <div class="detail-item"><div class="detail-label">Claimed Amount</div><div class="detail-value" style="font-weight:700;color:#0f3460;font-size:15px;">${App.fmtCurrency(c.amount)}</div></div>
+        <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value">${App.statusBadge(c.status)}</div></div>
+        <div class="detail-item" style="grid-column:1/-1;"><div class="detail-label">Description</div><div class="detail-value" style="line-height:1.65;">${c.description}</div></div>
+      </div>
+      ${c.acceptanceNotes ? `
+        <div class="divider"></div>
+        <div style="margin-bottom:12px;">
+          <div class="detail-label" style="margin-bottom:5px;">Acceptance Notes</div>
+          <div style="background:#f0fdf4;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;">${c.acceptanceNotes}</div>
+        </div>
+      ` : ''}
+      ${c.evaluationNotes ? `
+        <div class="divider"></div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-label">Evaluated Amount</div><div class="detail-value" style="font-weight:700;color:#0f3460;">${App.fmtCurrency(c.evaluatedAmount)}</div></div>
+          <div class="detail-item"><div class="detail-label">Risk Level</div><div class="detail-value">${App.riskBadge(c.riskLevel)}</div></div>
+          <div class="detail-item" style="grid-column:1/-1;"><div class="detail-label">Evaluation Notes</div>
+            <div style="background:#faf5ff;border-radius:8px;padding:10px 14px;font-size:13px;color:#374151;margin-top:4px;">${c.evaluationNotes}</div>
+          </div>
+        </div>
+      ` : ''}
+    `;
+
+    document.getElementById('modalFooter').innerHTML = `
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      ${c.status === 'accepted'        ? `<button class="btn btn-warning" onclick="startEval('${c.id}')">Start Evaluation</button>` : ''}
+      ${c.status === 'under_evaluation'? `<button class="btn btn-purple"  onclick="openEvaluate('${c.id}')">Submit Evaluation</button>` : ''}
+    `;
+
+    openModal();
+  }
+
+  /* ── Start evaluation ─────────────────── */
+  function startEval(id) {
+    App.updateCase(id, {
+      status: 'under_evaluation',
+      evaluationStartedAt: new Date().toISOString(),
+      evaluatorName: App.getUser()?.name || 'Unknown'
+    });
+    App.toast('Evaluation started. Case is now under evaluation.', 'info');
+    closeModal();
+    render();
+    App.renderBadges();
+  }
+
+  /* ── Evaluate modal ───────────────────── */
+  function openEvaluate(id) {
+    const c = App.getCaseById(id);
+    if (!c) return;
+    currentCaseId = id;
+    currentMode = 'evaluate';
+
+    document.getElementById('modalTitle').textContent = 'Submit Evaluation';
+    document.getElementById('modalSubtitle').textContent = `${c.id} — ${c.claimantName} · Claimed: ${App.fmtCurrency(c.amount)}`;
+
+    document.getElementById('modalBody').innerHTML = `
+      <div style="background:#f9fafb;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><div class="detail-label">Claimant</div><div class="detail-value">${c.claimantName}</div></div>
+          <div><div class="detail-label">Claim Type</div><div class="detail-value">${c.claimType}</div></div>
+          <div><div class="detail-label">Incident Date</div><div class="detail-value">${App.fmtDate(c.incidentDate)}</div></div>
+          <div><div class="detail-label">Original Claim</div><div class="detail-value" style="font-weight:700;color:#0f3460;">${App.fmtCurrency(c.amount)}</div></div>
+        </div>
+      </div>
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Evaluated Amount (USD) <span class="required">*</span></label>
+          <input type="number" class="form-control" id="evalAmount" value="${c.amount}" min="0" step="0.01" placeholder="0.00"/>
+          <div class="form-error" id="errAmount">Enter a valid evaluated amount.</div>
+          <div class="form-hint">Adjust based on verified documentation.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Risk Level <span class="required">*</span></label>
+          <select class="form-control" id="riskLevel">
+            <option value="">— Select risk —</option>
+            <option value="low">Low — Standard processing</option>
+            <option value="medium">Medium — Needs attention</option>
+            <option value="high">High — Requires senior review</option>
+          </select>
+          <div class="form-error" id="errRisk">Risk level is required.</div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Evaluation Notes <span class="required">*</span></label>
+          <textarea class="form-control" id="evalNotes" rows="4"
+            placeholder="Summarize evaluation findings, document verification, any deductions or adjustments made…"></textarea>
+          <div class="form-error" id="errNotes">Evaluation notes are required (min 20 characters).</div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Recommendation</label>
+          <select class="form-control" id="recommendation">
+            <option value="approve">Recommend Approval</option>
+            <option value="review">Recommend Additional Review</option>
+            <option value="deny">Recommend Denial</option>
+          </select>
+        </div>
+      </div>
+      <div id="adjNote" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#92400e;display:none;">
+        <strong>Note:</strong> The evaluated amount differs from the claimed amount. Ensure this adjustment is documented in the notes.
+      </div>
+    `;
+
+    /* Show adjustment notice */
+    document.getElementById('evalAmount').addEventListener('input', function() {
+      const diff = Math.abs(parseFloat(this.value || 0) - c.amount);
+      document.getElementById('adjNote').style.display = diff > 0.01 ? '' : 'none';
+    });
+
+    document.getElementById('modalFooter').innerHTML = `
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-purple" onclick="submitEvaluation()">Submit Evaluation</button>
+    `;
+
+    openModal();
+  }
+
+  function submitEvaluation() {
+    const amount = parseFloat(document.getElementById('evalAmount').value);
+    const risk   = document.getElementById('riskLevel').value;
+    const notes  = document.getElementById('evalNotes').value.trim();
+
+    let ok = true;
+    if (!amount || amount <= 0) { document.getElementById('errAmount').classList.add('show'); document.getElementById('evalAmount').classList.add('error'); ok = false; }
+    else { document.getElementById('errAmount').classList.remove('show'); document.getElementById('evalAmount').classList.remove('error'); }
+    if (!risk) { document.getElementById('errRisk').classList.add('show'); document.getElementById('riskLevel').classList.add('error'); ok = false; }
+    else { document.getElementById('errRisk').classList.remove('show'); document.getElementById('riskLevel').classList.remove('error'); }
+    if (notes.length < 20) { document.getElementById('errNotes').classList.add('show'); document.getElementById('evalNotes').classList.add('error'); ok = false; }
+    else { document.getElementById('errNotes').classList.remove('show'); document.getElementById('evalNotes').classList.remove('error'); }
+
+    if (!ok) return;
+
+    App.updateCase(currentCaseId, {
+      status: 'evaluated',
+      evaluatedAt: new Date().toISOString(),
+      evaluatedAmount: amount,
+      riskLevel: risk,
+      evaluationNotes: notes,
+      recommendation: document.getElementById('recommendation').value,
+      evaluatorName: App.getUser()?.name || 'Unknown'
+    });
+
+    App.toast('Evaluation submitted. Case is ready for approval.', 'success');
+    closeModal();
+    render();
+    App.renderBadges();
+  }
+
+  /* ── Helpers ──────────────────────────── */
+  function openModal()  { document.getElementById('modalOverlay').classList.add('open'); }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); currentCaseId = null; }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterRisk').value = '';
+    render();
+  }
+
+  document.getElementById('searchInput').addEventListener('input', render);
+  document.getElementById('filterStatus').addEventListener('change', render);
+  document.getElementById('filterRisk').addEventListener('change', render);
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  });
+
+  render();
+</script>
+</body>
+</html>
