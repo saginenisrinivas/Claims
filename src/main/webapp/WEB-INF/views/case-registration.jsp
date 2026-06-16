@@ -562,7 +562,7 @@
           '<div style="font-size:16px;font-weight:700;color:#0f3460;">' + bcpRef + '</div>' +
         '</div>' +
         '<div style="background:#f9fafb;border-radius:8px;padding:12px;grid-column:1/-1;">' +
-          '<div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">THITO Status</div>' +
+          '<div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">THITO Case Status</div>' +
           '<div style="font-size:13.5px;font-weight:600;color:#374151;">' + bcpStatus + '</div>' +
         '</div>' +
       '</div>' +

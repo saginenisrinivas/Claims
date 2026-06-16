@@ -158,7 +158,7 @@
         <div class="detail-item"><div class="detail-label">Claim Type</div><div class="detail-value">${UI.label('CLAIM_TYPE', c.claimType)}</div></div>
         <div class="detail-item"><div class="detail-label">Claim Nature</div><div class="detail-value">${UI.label('CLAIM_NATURE', c.claimNature)||'—'}</div></div>
         ${c.externalCaseNo ? `<div class="detail-item"><div class="detail-label">THITO Case Number</div><div class="detail-value" style="font-weight:600;color:#0f3460;">${c.externalCaseNo}</div></div>` : ''}
-        ${c.bcpCaseStatus  ? `<div class="detail-item"><div class="detail-label">THITO Status</div><div class="detail-value">${c.bcpCaseStatus}</div></div>` : ''}
+        ${c.bcpCaseStatus  ? `<div class="detail-item"><div class="detail-label">THITO Case Status</div><div class="detail-value">${c.bcpCaseStatus}</div></div>` : ''}
         <div class="detail-item"><div class="detail-label">Case Classification</div><div class="detail-value">${c.caseClassification||'—'}</div></div>
         <div class="detail-item"><div class="detail-label">Notification Date</div><div class="detail-value">${UI.fmtDate(c.notificationDate)}</div></div>
         <div class="detail-item"><div class="detail-label">Event Date</div><div class="detail-value">${UI.fmtDate(c.eventDate)}</div></div>
